@@ -34,12 +34,21 @@ class AuthentikController extends Controller
      * Handle the OIDC callback: resolve the user (auto-provisioning on first
      * login, matched by email) and log them in.
      */
-    public function callback(): RedirectResponse
+    public function callback(\Illuminate\Http\Request $request): RedirectResponse
     {
+        // TEMP diagnostics for the InvalidState investigation — remove once fixed.
+        Log::info('Authentik callback debug', [
+            'param_state' => $request->input('state'),
+            'session_state' => $request->session()->get('state'),
+            'has_code' => $request->filled('code'),
+            'session_id' => $request->session()->getId(),
+            'error' => $request->input('error'),
+        ]);
+
         try {
             $oauthUser = $this->driver()->user();
         } catch (Throwable $e) {
-            Log::warning('Authentik OIDC callback failed: ' . $e->getMessage());
+            Log::warning('Authentik OIDC callback failed: ' . get_class($e) . ' :: ' . $e->getMessage());
 
             return redirect()->route('login')->with('error', 'Authentik login failed. Please try again.');
         }
