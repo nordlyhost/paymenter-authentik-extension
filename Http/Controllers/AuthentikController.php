@@ -55,6 +55,12 @@ class AuthentikController extends Controller
             return redirect()->route('login')->with('error', 'Authentik login failed. Please try again.');
         }
 
+        // TEMP diagnostics — show exactly what Authentik's userinfo returned.
+        Log::warning('Authentik user resolved', [
+            'email' => $oauthUser->getEmail(),
+            'raw_claims' => $oauthUser->getRaw(),
+        ]);
+
         $email = $oauthUser->getEmail();
         if (!$email) {
             return redirect()->route('login')->with('error', 'Authentik did not return an email address.');
