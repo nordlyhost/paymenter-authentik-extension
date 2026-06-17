@@ -9,7 +9,7 @@ Built for [Nordly](https://nordly.gg) as part of an Authentik-as-IdP hub-and-spo
 SSO setup, but generic enough to work with any Authentik instance.
 
 - Paymenter v1.5.x (Laravel 12, PHP 8.3, Filament 5)
-- Uses `laravel/socialite` + `socialiteproviders/openid-connect` (proper OIDC discovery)
+- Uses `laravel/socialite` + `socialiteproviders/authentik` (dedicated Authentik provider)
 - Self-contained: no core file edits required
 
 ## How it works
@@ -25,11 +25,11 @@ SSO setup, but generic enough to work with any Authentik instance.
 
 ## Installation
 
-1. **Install the OIDC Socialite provider** in the Paymenter root:
+1. **Install the Authentik Socialite provider** in the Paymenter root:
 
    ```bash
    cd /var/www/paymenter
-   composer require socialiteproviders/openid-connect
+   composer require socialiteproviders/authentik
    ```
 
 2. **Place the extension** at `extensions/Others/Authentik/` (clone or symlink this repo):
@@ -40,7 +40,8 @@ SSO setup, but generic enough to work with any Authentik instance.
    ```
 
 3. **Enable + configure** in the admin panel under Extensions → Authentik:
-   - **Authentik OIDC Base URL** — e.g. `https://auth.example.com/application/o/paymenter`
+   - **Authentik Base URL** — your instance root, e.g. `https://auth.example.com`
+     (the provider derives the OAuth endpoints; no `/application/o/...` path)
    - **Client ID** / **Client Secret** — from the Authentik provider
    - **Login Button Label** — optional (defaults to `Authentik`)
 
@@ -62,10 +63,10 @@ Create an **OAuth2/OpenID Provider** and an **Application** linked to it:
 - **Redirect URI:** `https://<your-paymenter-domain>/oauth/authentik/callback`
 - **Scopes:** `openid`, `profile`, `email`
 - **Application slug:** e.g. `paymenter`
-- **Discovery URL:** `https://<authentik-domain>/application/o/<slug>/.well-known/openid-configuration`
 
-The **Base URL** in the extension config is the discovery URL without the
-`/.well-known/openid-configuration` suffix.
+The extension's **Base URL** is just your Authentik instance root
+(`https://<authentik-domain>`) — the provider builds the authorize/token/userinfo
+endpoints from it.
 
 ## Notes / roadmap
 

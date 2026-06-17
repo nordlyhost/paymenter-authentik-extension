@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
-use SocialiteProviders\OpenIDConnect\Provider as OpenIDConnectProvider;
+use SocialiteProviders\Authentik\Provider as AuthentikProvider;
+use SocialiteProviders\Manager\Config;
 use Throwable;
 
 class AuthentikController extends Controller
@@ -46,6 +47,12 @@ class AuthentikController extends Controller
             return redirect()->route('login')->with('error', 'Authentik did not return an email address.');
         }
 
+        // Reject only explicitly-unverified emails (Authentik omits the claim when
+        // email verification isn't configured; absence is treated as trusted).
+        if (($oauthUser->getRaw()['email_verified'] ?? true) === false) {
+            return redirect()->route('login')->with('error', 'Your Authentik email address is not verified.');
+        }
+
         $user = User::where('email', $email)->first();
 
         if (!$user) {
@@ -69,18 +76,33 @@ class AuthentikController extends Controller
     }
 
     /**
-     * Build the Socialite OpenID Connect driver from the extension settings.
+     * Build the Socialite Authentik driver from the extension settings.
+     *
+     * Built manually (not via the SocialiteWasCalled event), so the provider's
+     * additional `base_url` config key is injected with setConfig(). base_url is
+     * the Authentik instance root (e.g. https://auth.example.com); the provider
+     * appends /application/o/{authorize,token,userinfo}/ itself.
      */
     private function driver()
     {
         $settings = $this->settings();
 
-        return Socialite::buildProvider(OpenIDConnectProvider::class, [
-            'client_id' => $settings['client_id'] ?? null,
-            'client_secret' => $settings['client_secret'] ?? null,
-            'redirect' => '/oauth/authentik/callback',
-            'base_url' => rtrim($settings['base_url'] ?? '', '/'),
+        $clientId = $settings['client_id'] ?? null;
+        $clientSecret = $settings['client_secret'] ?? null;
+        $baseUrl = rtrim($settings['base_url'] ?? '', '/');
+        $redirect = '/oauth/authentik/callback';
+
+        $driver = Socialite::buildProvider(AuthentikProvider::class, [
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'redirect' => $redirect,
         ]);
+
+        $driver->setConfig(new Config($clientId, $clientSecret, $redirect, [
+            'base_url' => $baseUrl,
+        ]));
+
+        return $driver;
     }
 
     /**

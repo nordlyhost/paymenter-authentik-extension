@@ -28,10 +28,10 @@ class Authentik extends Extension
         return [
             [
                 'name' => 'base_url',
-                'label' => 'Authentik OIDC Base URL',
+                'label' => 'Authentik Base URL',
                 'type' => 'text',
-                'description' => 'The provider base URL, e.g. https://auth.example.com/application/o/<app-slug>. '
-                    . 'OIDC discovery is performed at this URL + /.well-known/openid-configuration.',
+                'description' => 'Your Authentik instance root, e.g. https://auth.example.com '
+                    . '(no trailing path). The OAuth endpoints are derived from this automatically.',
                 'required' => true,
             ],
             [
