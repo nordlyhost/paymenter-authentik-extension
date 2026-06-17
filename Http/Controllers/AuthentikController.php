@@ -67,6 +67,7 @@ class AuthentikController extends Controller
         }
 
         $user = User::where('email', $email)->first();
+        $matched = (bool) $user;
 
         if (!$user) {
             $user = $this->provisionUser($oauthUser, $email);
@@ -84,6 +85,19 @@ class AuthentikController extends Controller
         }
 
         (new Login)->execute($user, true);
+
+        // TEMP diagnostics — confirm auth state right after login.
+        Log::warning('Authentik post-login', [
+            'user_id' => $user->id,
+            'email' => $email,
+            'matched_existing' => $matched,
+            'role_id' => $user->role_id,
+            'tfa' => (bool) $user->tfa_secret,
+            'auth_check' => \Illuminate\Support\Facades\Auth::check(),
+            'auth_id' => \Illuminate\Support\Facades\Auth::id(),
+            'session_user_session' => $request->session()->get('user_session'),
+            'session_id' => $request->session()->getId(),
+        ]);
 
         return redirect()->route('home');
     }
