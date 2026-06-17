@@ -34,46 +34,32 @@ class AuthentikController extends Controller
      * Handle the OIDC callback: resolve the user (auto-provisioning on first
      * login, matched by email) and log them in.
      */
-    public function callback(\Illuminate\Http\Request $request): RedirectResponse
+    public function callback(): RedirectResponse
     {
-        // TEMP diagnostics for the InvalidState investigation — remove once fixed.
-        // Logged at warning level because production LOG_LEVEL filters out info.
-        Log::warning('Authentik callback debug', [
-            'param_state' => $request->input('state'),
-            'session_state' => $request->session()->get('state'),
-            'has_code' => $request->filled('code'),
-            'session_id' => $request->session()->getId(),
-            'has_session_cookie' => $request->hasCookie(config('session.cookie')),
-            'oauth_error' => $request->input('error'),
-        ]);
+        $settings = $this->settings();
 
         try {
             $oauthUser = $this->driver()->user();
         } catch (Throwable $e) {
-            Log::warning('Authentik OIDC callback failed: ' . get_class($e) . ' :: ' . $e->getMessage());
+            Log::warning('Authentik OIDC callback failed: ' . $e->getMessage());
 
             return redirect()->route('login')->with('error', 'Authentik login failed. Please try again.');
         }
-
-        // TEMP diagnostics — show exactly what Authentik's userinfo returned.
-        Log::warning('Authentik user resolved', [
-            'email' => $oauthUser->getEmail(),
-            'raw_claims' => $oauthUser->getRaw(),
-        ]);
 
         $email = $oauthUser->getEmail();
         if (!$email) {
             return redirect()->route('login')->with('error', 'Authentik did not return an email address.');
         }
 
-        // Reject only explicitly-unverified emails (Authentik omits the claim when
-        // email verification isn't configured; absence is treated as trusted).
-        if (($oauthUser->getRaw()['email_verified'] ?? true) === false) {
+        // Authentik reports email_verified=false unless an email-verification flow
+        // is configured, so this is opt-in. Authentik is a trusted IdP and the
+        // admin owns the email, so by default the claim is accepted as-is.
+        if (filter_var($settings['require_verified_email'] ?? false, FILTER_VALIDATE_BOOL)
+            && ($oauthUser->getRaw()['email_verified'] ?? false) !== true) {
             return redirect()->route('login')->with('error', 'Your Authentik email address is not verified.');
         }
 
         $user = User::where('email', $email)->first();
-        $matched = (bool) $user;
 
         if (!$user) {
             $user = $this->provisionUser($oauthUser, $email);
@@ -91,19 +77,6 @@ class AuthentikController extends Controller
         }
 
         (new Login)->execute($user, true);
-
-        // TEMP diagnostics — confirm auth state right after login.
-        Log::warning('Authentik post-login', [
-            'user_id' => $user->id,
-            'email' => $email,
-            'matched_existing' => $matched,
-            'role_id' => $user->role_id,
-            'tfa' => (bool) $user->tfa_secret,
-            'auth_check' => \Illuminate\Support\Facades\Auth::check(),
-            'auth_id' => \Illuminate\Support\Facades\Auth::id(),
-            'session_user_session' => $request->session()->get('user_session'),
-            'session_id' => $request->session()->getId(),
-        ]);
 
         return redirect()->route('home');
     }

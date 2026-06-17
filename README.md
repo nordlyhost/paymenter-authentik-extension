@@ -44,6 +44,9 @@ SSO setup, but generic enough to work with any Authentik instance.
      (the provider derives the OAuth endpoints; no `/application/o/...` path)
    - **Client ID** / **Client Secret** — from the Authentik provider
    - **Login Button Label** — optional (defaults to `Authentik`)
+   - **Require Verified Email** — optional, off by default. Authentik reports
+     `email_verified=false` unless you configure an email-verification flow, so
+     leave this off unless you've set one up (otherwise all logins are rejected).
 
 4. **Verify route precedence** (the extension routes must win over Paymenter's
    wildcard `/oauth/{provider}`):
@@ -73,7 +76,9 @@ endpoints from it.
 - **v1 matches users by email only** (mirrors Paymenter's native Discord/Google
   flow). A user who already exists with the same email is linked automatically.
   Subject-ID-based linking (an `external_id` column) is a possible future hardening.
-- Auto-creation trusts the IdP-asserted email as verified.
+- Auto-creation trusts the IdP-asserted email. Authentik is a trusted private IdP
+  where the admin owns every account, so `email_verified` is **not** enforced by
+  default (see the *Require Verified Email* setting above).
 
 ## License
 

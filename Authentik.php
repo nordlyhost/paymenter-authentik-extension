@@ -54,6 +54,17 @@ class Authentik extends Extension
                 'default' => 'Authentik',
                 'required' => false,
             ],
+            [
+                'name' => 'require_verified_email',
+                'label' => 'Require Verified Email',
+                'type' => 'checkbox',
+                'database_type' => 'boolean',
+                'description' => 'Reject logins where Authentik reports the email as unverified. '
+                    . 'Leave off unless you have configured an email-verification flow in Authentik '
+                    . '(Authentik reports email_verified=false by default).',
+                'default' => false,
+                'required' => false,
+            ],
         ];
     }
 
