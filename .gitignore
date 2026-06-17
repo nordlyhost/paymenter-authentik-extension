@@ -1,0 +1,9 @@
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# PHP / Composer (the extension uses Paymenter's root vendor/)
+/vendor/
+composer.lock
