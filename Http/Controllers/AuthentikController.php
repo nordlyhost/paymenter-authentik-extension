@@ -37,12 +37,14 @@ class AuthentikController extends Controller
     public function callback(\Illuminate\Http\Request $request): RedirectResponse
     {
         // TEMP diagnostics for the InvalidState investigation — remove once fixed.
-        Log::info('Authentik callback debug', [
+        // Logged at warning level because production LOG_LEVEL filters out info.
+        Log::warning('Authentik callback debug', [
             'param_state' => $request->input('state'),
             'session_state' => $request->session()->get('state'),
             'has_code' => $request->filled('code'),
             'session_id' => $request->session()->getId(),
-            'error' => $request->input('error'),
+            'has_session_cookie' => $request->hasCookie(config('session.cookie')),
+            'oauth_error' => $request->input('error'),
         ]);
 
         try {
