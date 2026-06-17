@@ -23,8 +23,10 @@ class AuthentikController extends Controller
      */
     public function redirect()
     {
+        // setScopes() replaces the provider's defaults (which include
+        // goauthentik.io/api); scopes() would merge and over-request.
         return $this->driver()
-            ->scopes(['openid', 'profile', 'email'])
+            ->setScopes(['openid', 'profile', 'email'])
             ->redirect();
     }
 
