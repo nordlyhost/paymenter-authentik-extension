@@ -25,9 +25,17 @@ class AuthentikController extends Controller
     {
         // setScopes() replaces the provider's defaults (which include
         // goauthentik.io/api); scopes() would merge and over-request.
-        return $this->driver()
-            ->setScopes(['openid', 'profile', 'email'])
-            ->redirect();
+        $driver = $this->driver()->setScopes(['openid', 'profile', 'email']);
+
+        // Optional OIDC prompt (e.g. select_account / login) so users can confirm
+        // or switch account instead of being silently re-logged-in by their
+        // existing Authentik session.
+        $prompt = $this->settings()['login_prompt'] ?? '';
+        if ($prompt !== '') {
+            $driver->with(['prompt' => $prompt]);
+        }
+
+        return $driver->redirect();
     }
 
     /**

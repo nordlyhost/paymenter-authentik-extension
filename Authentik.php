@@ -76,6 +76,21 @@ class Authentik extends Extension
                 'default' => false,
                 'required' => false,
             ],
+            [
+                'name' => 'login_prompt',
+                'label' => 'Account Selection Prompt',
+                'type' => 'select',
+                'description' => 'Controls what Authentik shows when a user clicks the login button while already '
+                    . 'signed in to Authentik. "Seamless" logs them straight back in. "Select account" shows a '
+                    . 'confirm/switch screen (like Google). "Re-authenticate" forces a fresh login each time.',
+                'default' => '',
+                'required' => false,
+                'options' => [
+                    '' => 'Seamless (silent sign-in)',
+                    'select_account' => 'Select account (confirm / switch)',
+                    'login' => 'Re-authenticate (force login)',
+                ],
+            ],
         ];
     }
 

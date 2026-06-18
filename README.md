@@ -47,6 +47,10 @@ SSO setup, but generic enough to work with any Authentik instance.
    - **Require Verified Email** — optional, off by default. Authentik reports
      `email_verified=false` unless you configure an email-verification flow, so
      leave this off unless you've set one up (otherwise all logins are rejected).
+   - **Account Selection Prompt** — optional, default "Seamless". Controls what
+     Authentik shows when a signed-in user clicks the login button: *Seamless*
+     (silent), *Select account* (a confirm/switch screen, like Google), or
+     *Re-authenticate* (force a fresh login). Uses the OIDC `prompt` parameter.
    - **Authentik-only Login Page** — optional, off by default. When on, the login
      page shows only the Authentik button (native email/password form and other
      social providers hidden). The native login stays reachable at **`/login/local`**
