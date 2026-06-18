@@ -65,6 +65,17 @@ class Authentik extends Extension
                 'default' => false,
                 'required' => false,
             ],
+            [
+                'name' => 'force_sso_login',
+                'label' => 'Authentik-only Login Page',
+                'type' => 'checkbox',
+                'database_type' => 'boolean',
+                'description' => 'Replace the login page with an Authentik-only login, hiding the native '
+                    . 'email/password form and other social providers. The native login stays reachable at '
+                    . '/login/local for admin break-glass. Pairs well with disabling registration.',
+                'default' => false,
+                'required' => false,
+            ],
         ];
     }
 
@@ -80,6 +91,7 @@ class Authentik extends Extension
         // Capture config now so the deferred render closure doesn't rely on
         // backtrace-based config resolution at render time.
         $label = $this->config('button_label') ?: 'Authentik';
+        $forceSso = filter_var($this->config('force_sso_login'), FILTER_VALIDATE_BOOL);
 
         // Inject the login button via Paymenter's `hook('auth.login')` render hook.
         Event::listen('auth.login', function () use ($label) {
@@ -91,5 +103,16 @@ class Authentik extends Extension
                 'priority' => 20,
             ];
         });
+
+        // When configured, override the customer login view with an Authentik-only
+        // page. Done by prepending this extension's view path (theme untouched, so
+        // layout/assets are unaffected). Prepend after the app is fully booted so it
+        // wins over the theme view paths, which are set during provider boot. If the
+        // override never resolves, the normal theme login is shown — a safe fallback.
+        if ($forceSso) {
+            app()->booted(function () {
+                app('view')->getFinder()->prependLocation(__DIR__ . '/resources/views');
+            });
+        }
     }
 }

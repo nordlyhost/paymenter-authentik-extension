@@ -47,6 +47,12 @@ SSO setup, but generic enough to work with any Authentik instance.
    - **Require Verified Email** — optional, off by default. Authentik reports
      `email_verified=false` unless you configure an email-verification flow, so
      leave this off unless you've set one up (otherwise all logins are rejected).
+   - **Authentik-only Login Page** — optional, off by default. When on, the login
+     page shows only the Authentik button (native email/password form and other
+     social providers hidden). The native login stays reachable at **`/login/local`**
+     for admin break-glass. The theme is not modified — the extension overrides only
+     the login view, so layout and assets are unaffected. Pairs with disabling
+     registration so the panel is a pure SSO consumer.
 
 4. **Verify route precedence** (the extension routes must win over Paymenter's
    wildcard `/oauth/{provider}`):
