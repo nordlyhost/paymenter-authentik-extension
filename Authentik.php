@@ -120,6 +120,17 @@ class Authentik extends Extension
                     'background:radial-gradient(60% 100% at 50% 0%,color-mix(in srgb,#2d5f3f 25%,transparent) 0%,transparent 100%)}' .
                     // Lockup already includes wordmark — hide the standalone app-name text
                     'nav a>span.font-bold,footer .flex-row>span.font-bold{display:none!important}' .
+                    // Footer: match marketing site layout
+                    // Transparent bg + ultra-thin border (no separate footer bg)
+                    'footer{background:transparent!important;border-top:1px solid rgba(255,255,255,0.05)!important}' .
+                    // Remove the huge my-12 margin on the inner container, replace with padding
+                    'footer>.container{margin-top:0!important;margin-bottom:0!important;padding-top:2rem!important;padding-bottom:2rem!important}' .
+                    // Left column: flip from flex-col to flex-row so logo+copyright are on one line
+                    'footer .flex-col.gap-6{flex-direction:row!important;align-items:center!important;gap:0!important;flex:1!important}' .
+                    // Copyright: push to right edge of left column, small + muted
+                    'footer .flex-col.gap-6>div:last-child{margin-left:auto!important;padding-right:2rem;font-size:0.75rem!important;opacity:0.4}' .
+                    // Logo in footer: h-7 matching marketing site, slight opacity
+                    'footer img[alt="Nordly"]{height:1.75rem!important;width:auto;opacity:0.8}' .
                     '</style>',
                 'priority' => 100,
             ];
