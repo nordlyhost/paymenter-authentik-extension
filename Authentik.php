@@ -118,6 +118,8 @@ class Authentik extends Extension
                     // Subtle top glow matching the marketing site
                     'body::before{content:"";position:fixed;top:0;left:0;right:0;height:400px;pointer-events:none;z-index:0;' .
                     'background:radial-gradient(60% 100% at 50% 0%,color-mix(in srgb,#2d5f3f 25%,transparent) 0%,transparent 100%)}' .
+                    // Lockup already includes wordmark — hide the standalone app-name text
+                    'nav a>span.font-bold,footer .flex-row>span.font-bold{display:none!important}' .
                     '</style>',
                 'priority' => 100,
             ];
