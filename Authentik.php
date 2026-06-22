@@ -108,6 +108,24 @@ class Authentik extends Extension
         $label = $this->config('button_label') ?: 'Authentik';
         $forceSso = filter_var($this->config('force_sso_login'), FILTER_VALIDATE_BOOL);
 
+        // Add cross-platform navigation links to the user account dropdown.
+        Event::listen('navigation.account-dropdown', function () {
+            return [
+                [
+                    'name' => 'Game Panel',
+                    'url' => 'https://panel.nordly.gg',
+                    'spa' => false,
+                    'priority' => 5,
+                ],
+                [
+                    'name' => 'nordly.gg',
+                    'url' => 'https://nordly.gg',
+                    'spa' => false,
+                    'priority' => 6,
+                ],
+            ];
+        });
+
         // Inject the login button via Paymenter's `hook('auth.login')` render hook.
         Event::listen('auth.login', function () use ($label) {
             return [
