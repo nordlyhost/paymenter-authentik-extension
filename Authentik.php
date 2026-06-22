@@ -131,6 +131,8 @@ class Authentik extends Extension
                     'footer .flex-col.gap-6>div:last-child{margin-left:auto!important;padding-right:2rem;font-size:0.75rem!important;opacity:0.4}' .
                     // Logo in footer: h-7 matching marketing site, slight opacity
                     'footer img[alt="Nordly"]{height:1.75rem!important;width:auto;opacity:0.8}' .
+                    // Hide "Powered by Paymenter" badge
+                    'footer a[href="https://paymenter.org"]{display:none!important}' .
                     '</style>',
                 'priority' => 100,
             ];
