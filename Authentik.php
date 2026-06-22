@@ -108,6 +108,21 @@ class Authentik extends Extension
         $label = $this->config('button_label') ?: 'Authentik';
         $forceSso = filter_var($this->config('force_sso_login'), FILTER_VALIDATE_BOOL);
 
+        // Inject Nordly brand colors and top glow into the client portal <head>.
+        Event::listen('head', function () {
+            return [
+                'view' => '<style>' .
+                    // Override Paymenter's default blue primary with Nordly green
+                    ':root{--color-primary:142 36% 27%}' .
+                    '.dark{--color-primary:142 28% 43%}' .
+                    // Subtle top glow matching the marketing site
+                    'body::before{content:"";position:fixed;top:0;left:0;right:0;height:400px;pointer-events:none;z-index:0;' .
+                    'background:radial-gradient(60% 100% at 50% 0%,color-mix(in srgb,#2d5f3f 25%,transparent) 0%,transparent 100%)}' .
+                    '</style>',
+                'priority' => 100,
+            ];
+        });
+
         // Add cross-platform navigation links to the user account dropdown.
         Event::listen('navigation.account-dropdown', function () {
             return [
